@@ -1,5 +1,5 @@
 import torch
-from torch_sparse import SparseTensor
+from torch_sparse import SparseTensor, spspmm
 
 
 
@@ -57,3 +57,41 @@ def k_hop_subgraph(edge_index, num_nodes, num_hops, is_directed=False):
     return node_mask
 
 
+def get_k_hop_neighbors(edge_index, node_id, k = 1, only_this_hop = True):
+    """
+    Function to get the k-hop neighbors of a given node in a graph.
+
+    This function returns the indices of the nodes that are k hops away from the given node.
+    If `only_this_hop` is True, it returns only the nodes that are exactly k hops away.
+    If `only_this_hop` is False, it returns all nodes that are up to k hops away.
+
+    Parameters:
+    edge_index (Tensor): The edge indices.
+    node_id (int): The id of the node for which to find the k-hop neighbors.
+    k (int, optional): The number of hops to consider. Defaults to 1.
+    only_this_hop (bool, optional): Whether to return only nodes that are exactly k hops away. Defaults to True.
+
+    Returns:
+    Tensor: The indices of the k-hop neighbors.
+    """
+    if k == 0:
+        return torch.tensor([node_id])
+    num_nodes = edge_index.shape[1]
+    idxs = torch.arange(num_nodes)
+    first_mask = torch.zeros(num_nodes, dtype=torch.bool)
+    first_mask[node_id] = 1
+    second_mask = torch.zeros(num_nodes, dtype=torch.bool)
+    indices = torch.where(edge_index[0] == node_id)[0]
+    second_mask[edge_index[1][indices]] = 1
+    value = torch.ones(num_nodes)
+    for _ in range(k - 1):
+        edge_index, _ = spspmm(edge_index, value, edge_index, value, num_nodes, num_nodes, num_nodes)
+        indices = torch.where(edge_index[0] == node_id)[0]
+        first_mask = second_mask
+        second_mask = torch.zeros(num_nodes, dtype=torch.bool)
+        second_mask[edge_index[1][indices]] = 1
+    
+    if only_this_hop:
+        return idxs[second_mask & ~first_mask]
+    else:
+        return idxs[second_mask]
