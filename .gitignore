@@ -127,8 +127,9 @@ dmypy.json
 .pyre/
 
 
-local_dirty_process/
-local_dirty_process/*
+LLM4Graph/local_dirty_process/
+LLM4Graph/local_dirty_process/*
 
 local_dirty_preprocess/
 local_dirty_preprocess/*
+
