@@ -128,3 +128,7 @@ dmypy.json
 
 
 local_dirty_process/
+local_dirty_process/*
+
+local_dirty_preprocess/
+local_dirty_preprocess/*
