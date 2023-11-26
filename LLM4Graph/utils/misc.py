@@ -2,7 +2,7 @@ import random
 import os 
 import numpy as np
 import torch
-
+import pandas as pd
 
 
 def seed_everything(seed: int):
@@ -27,3 +27,19 @@ def seed_everything(seed: int):
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = True
+
+
+
+def load_parquet(path: str):
+    """
+    Function to load a parquet file.
+
+    This function loads a parquet file and returns it as a pandas dataframe.
+
+    Parameters:
+    path (str): The path to the parquet file.
+
+    Returns:
+    pd.DataFrame: The dataframe containing the parquet file data.
+    """
+    return pd.read_parquet(path)
