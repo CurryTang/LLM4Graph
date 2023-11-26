@@ -33,6 +33,8 @@ class TAGWikiCSDataset(InMemoryDataset):
             [data]
         )
 
+        self.raw_texts = pd.read_parquet(self.processed_paths[0])
+
 
     @property
     def raw_dir(self) -> str:
@@ -40,7 +42,7 @@ class TAGWikiCSDataset(InMemoryDataset):
     
     @property
     def processed_dir(self) -> str:
-        return osp.join(self.root, self.name, "processed")
+        return osp.join(self.root, self.name, "processed", self.split)
     
     @property
     def raw_file_names(self) -> str:
@@ -58,10 +60,12 @@ class TAGWikiCSDataset(InMemoryDataset):
     
     def download(self):
         for name in self.raw_file_names:
-            gdown(
-                self.url_lib[name], osp.join(self.raw_dir, name, quiet = True)
+            gdown.download(
+                self.url_lib[name], osp.join(self.raw_dir, name), quiet = True, fuzzy = True
             )
-    
+    def get_raw_texts(self):
+        return self.raw_texts
+
     def __repr__(self) -> str:
         return f"{self.name}TAG()"
 

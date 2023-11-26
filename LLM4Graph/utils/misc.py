@@ -3,6 +3,7 @@ import os
 import numpy as np
 import torch
 import pandas as pd
+import datetime
 
 
 def seed_everything(seed: int):
@@ -43,3 +44,23 @@ def load_parquet(path: str):
     pd.DataFrame: The dataframe containing the parquet file data.
     """
     return pd.read_parquet(path)
+
+
+def generate_timestamp_filename(extension=".json"):
+    """
+    Generates a filename with the current timestamp.
+
+    Args:
+    - extension (str): File extension to be appended. Default is ".txt".
+
+    Returns:
+    - str: Filename based on the current timestamp.
+    """
+    # Get the current timestamp
+    timestamp = datetime.datetime.now()
+
+    # Format the timestamp and add the file extension
+    # Example format: '2023-03-15_12-30-45.txt'
+    filename = timestamp.strftime("%Y-%m-%d_%H-%M-%S") + extension
+
+    return filename

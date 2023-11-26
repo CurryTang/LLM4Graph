@@ -133,3 +133,17 @@ LLM4Graph/local_dirty_process/*
 local_dirty_preprocess/
 local_dirty_preprocess/*
 
+
+*.pt 
+*.parquet 
+*.pkl 
+*.csv
+
+*/*.pt 
+*/*.parquet
+*/*.pkl 
+*/*.csv
+
+examples/data/*
+
+examples/data/

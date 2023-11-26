@@ -4,18 +4,19 @@ import os.path as osp
 import gdown
 import pandas as pd
 from LLM4Graph.utils.data_utils import get_mask
+from io import BytesIO
 
 class TAGPlanetoidDataset(InMemoryDataset):
     """
         The TAG version of the classical Planetoid dataset.
     """
     url_lib = {
-        "cora_sbert.pt": "https://drive.google.com/file/d/1e72LU6DTcAJ7o8gpE36QhuNpLfsRJUpM",
-        "cora_raw.parquet":  "https://drive.google.com/file/d/1wD1lHj3Tk0gzOwPuQJk54CHni_mtuIJG",
-        "citeseer_sbert.pt": "https://drive.google.com/file/d/10YjtJ_4Yau-lgx6qzobW27H6199BZ3tf",
-        "citeseer_raw.parquet": "https://drive.google.com/file/d/1u8HxqhIja_h_Ny8TMudHBVBD-TwE6tqU", 
-        "pubmed_sbert.pt": "https://drive.google.com/file/d/13XWoAs667QREkx3OqDpbxSUEPAqY8zVj", 
-        "pubmed_raw.parquet": "https://drive.google.com/file/d/1Xwmpx5HQh82fN8_46WFuQRNJt7jT5909"
+        "cora_sbert.pt": "https://drive.google.com/file/d/1e72LU6DTcAJ7o8gpE36QhuNpLfsRJUpM/view?usp=sharing",
+        "cora_raw.parquet":  "https://drive.google.com/file/d/1wD1lHj3Tk0gzOwPuQJk54CHni_mtuIJG/view?usp=drive_link",
+        "citeseer_sbert.pt": "https://drive.google.com/file/d/10YjtJ_4Yau-lgx6qzobW27H6199BZ3tf/view?usp=sharing",
+        "citeseer_raw.parquet": "https://drive.google.com/file/d/1u8HxqhIja_h_Ny8TMudHBVBD-TwE6tqU/view?usp=sharing",
+        "pubmed_sbert.pt": "https://drive.google.com/file/d/13XWoAs667QREkx3OqDpbxSUEPAqY8zVj/view?usp=sharing", 
+        "pubmed_raw.parquet": "https://drive.google.com/file/d/1Xwmpx5HQh82fN8_46WFuQRNJt7jT5909/view?usp=sharing"
     }
     def __init__(self, root = None, name = "Cora", split = "random",
                  train_ratio = 0.6, val_ratio = 0.2, test_ratio = 0.2, num_splits = 10,
@@ -41,6 +42,8 @@ class TAGPlanetoidDataset(InMemoryDataset):
         self.data, self.slices = self.collate(
             [data]
         )
+        
+        self.raw_texts = pd.read_parquet(self.processed_paths[0])
 
 
     @property
@@ -49,7 +52,7 @@ class TAGPlanetoidDataset(InMemoryDataset):
     
     @property
     def processed_dir(self) -> str:
-        return osp.join(self.root, self.name, "processed")
+        return osp.join(self.root, self.name, "processed", self.split)
     
     @property
     def raw_file_names(self) -> str:
@@ -67,12 +70,15 @@ class TAGPlanetoidDataset(InMemoryDataset):
     
     def download(self):
         for name in self.raw_file_names:
-            gdown(
-                self.url_lib[name], osp.join(self.raw_dir, name, quiet = True)
+            gdown.download(
+                self.url_lib[name], osp.join(self.raw_dir, name), quiet=True, fuzzy=True
             )
     
     def __repr__(self) -> str:
         return f"{self.name}TAG()"
+    
+    def get_raw_texts(self):
+        return self.raw_texts
 
     def process(self):
         for name in self.raw_file_names:
