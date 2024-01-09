@@ -147,3 +147,10 @@ local_dirty_preprocess/*
 examples/data/*
 
 examples/data/
+
+
+root/
+root/*
+
+logging/
+logging/*

@@ -64,3 +64,23 @@ def generate_timestamp_filename(extension=".json"):
     filename = timestamp.strftime("%Y-%m-%d_%H-%M-%S") + extension
 
     return filename
+
+
+
+
+def get_first_k_words(s, k):
+    """
+    Returns the first k words from the given string.
+
+    Args:
+    - s (str): The string to extract words from.
+    - k (int): The number of words to extract.
+
+    Returns:
+    - str: A string containing the first k words.
+    """
+    # Split the string into words
+    words = s.split()
+
+    # Take the first k words and join them back into a string
+    return ' '.join(words[:k])
