@@ -7,6 +7,10 @@ from LLM4Graph.models import get_model
 import wandb
 import ipdb
 import numpy as np
+import warnings
+# Suppress all warnings
+warnings.filterwarnings("ignore")
+
 
 
 def main(cfg):
@@ -66,7 +70,7 @@ def main(cfg):
 
 if __name__ == '__main__':
     cfg = update_cfg(cfg)
-    import ipdb; ipdb.set_trace()
+    # import ipdb; ipdb.set_trace()
     if cfg.wandb_enable:
         wandb.login(key=cfg.wandb)
         wandb.init(project=cfg.wandb_project, name=cfg.exp_name, config=cfg)

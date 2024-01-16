@@ -201,13 +201,14 @@ class NAGTransform(object):
     def __call__(self, data): 
         if self.num_hops < 0:
             raise ValueError("num_hops should be greater than 0")
+        lap_features = LapPE(data.edge_index, self.lap_dim, data.x.size(0))
+        new_features = torch.cat([data.x, lap_features], dim=1)
+        data.x = new_features
         prop_features = get_propagated_features(
             data.edge_index, data.x, k = self.num_hops, normalize=False
         )
         prop_features = torch.stack(prop_features, dim = 1)
-        lap_features = LapPE(data.edge_index, self.lap_dim, data.x.size(0))
-        new_features = torch.cat([prop_features, lap_features], dim=-1)
-        data.x = new_features
+        data.x = prop_features
         return data
 
 

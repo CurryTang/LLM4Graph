@@ -54,13 +54,14 @@ def get_propagated_features(edge_index, features, k = 0, normalize = True):
     results = []
     if k == 0:
         # features = features.reshape(num_nodes, 1, -1)
-        results.append(value)
+        results.append(features)
         return results
     else:
-        results.append(value)
-        # results.append(features.rehsape(num_nodes, 1, -1))
+        results.append(features)
+        aggr_features = features
+        # import ipdb; ipdb.set_trace()
         for _ in range(k):
-            edge_index, value = spspmm(edge_index, value, edge_index, value, num_nodes, num_nodes, num_nodes)
-            aggr_features = spmm(edge_index, value, num_nodes, num_nodes, features)
+            # edge_index, value = spspmm(edge_index, value, edge_index, value, num_nodes, num_nodes, num_nodes)
+            aggr_features = spmm(edge_index, value, num_nodes, num_nodes, aggr_features)
             results.append(aggr_features)
         return results
