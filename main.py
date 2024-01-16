@@ -66,6 +66,7 @@ def main(cfg):
 
 if __name__ == '__main__':
     cfg = update_cfg(cfg)
+    import ipdb; ipdb.set_trace()
     if cfg.wandb_enable:
         wandb.login(key=cfg.wandb)
         wandb.init(project=cfg.wandb_project, name=cfg.exp_name, config=cfg)

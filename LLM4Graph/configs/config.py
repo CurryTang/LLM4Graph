@@ -4,20 +4,34 @@ from yacs.config import CfgNode as CN
 
 def set_config(cfg):
     ## Basic config
-    cfg.seed = 0
+    cfg.seeds = [0,1,2]
+    cfg.wandb_enable = False
+    cfg.wandb_project = "LLM4Graph"
     cfg.wandb = "you-will-never-know"
+    cfg.exp_name = "test"
     cfg.num_workers = 8
     cfg.device = 'cuda'
+    cfg.n_trials = 30
+    cfg.optuna_db = "sqlite:////mnt/home/chenzh85/graphlang/LLM4Graph/root/optuna.db"
 
     ## dataset-related variables
     cfg.dataset = CN()
     cfg.dataset.name = 'cora'
+    cfg.dataset.level = 'node'
     cfg.dataset.root = "/mnt/home/chenzh85/graphlang/LLM4Graph/root"
     cfg.dataset.re_generate_random_mask = False
     ## only valid if re_generate_random_mask is True
     cfg.dataset.train_ratio = -1
     cfg.dataset.val_ratio = -1
     cfg.dataset.test_ratio = -1
+    cfg.dataset.planetoid_high = False
+    ### only need to be set if dataset is not from ogb
+    cfg.dataset.eval = 'accuracy'
+    cfg.dataset.loss = 'cross-entropy'
+    ## choices: saint, torch, pyg, sage
+    cfg.dataset.loader = 'saint'
+    ## whether we want to maximize the objective (classification) or minimize (regression)
+    cfg.dataset.objetive = 'maximize'
 
     ## path-related variables
     cfg.logging = "/mnt/home/chenzh85/graphlang/LLM4Graph/logging"
@@ -27,7 +41,30 @@ def set_config(cfg):
     cfg.env = CN()
     cfg.env.llama_path = "/mnt/home/chenzh85/graphlang/Graph-LLM/llama2-7b"
     cfg.env.metis_dll = "/mnt/home/chenzh85/anaconda3/envs/acl24/lib/libmetis.so"
-    cfg.optim = 'adam'
+
+    ## model-related configs
+    cfg.model = CN()
+    cfg.model.name = 'GCN'
+    cfg.model.nlayer_gnn = 2
+    cfg.model.nlayer_gt = 2
+    cfg.model.nhead = 1
+    cfg.model.hidden_dim = 64
+    cfg.model.dropout = 0.5
+    cfg.model.attention_dropout = 0.5
+    cfg.model.act = 'relu'
+    cfg.model.norm = 'batchNorm'
+    ## set this when load the data 
+    cfg.model.num_classes = -1
+    cfg.model.num_features = -1
+    ## for SGFormer
+    cfg.model.graph_weight = 0.8
+    ## for NAGPhormer
+    cfg.model.feature_prop_hop = 3
+    cfg.model.gt = CN() 
+    cfg.model.gt.pe_dim = 16
+
+    
+
 
     ## common training utils config
     cfg.train = CN()
@@ -35,12 +72,12 @@ def set_config(cfg):
     cfg.train.scheduler = None
     cfg.train.lr_reduce_factor = 0.5
     cfg.train.lr_schedule_patience = 20
+    ## two ways to quit training: min_lr or early_stop
     cfg.train.min_lr = 1e-5
     cfg.train.full_batch = False
     ## only valid if full_batch is False
     cfg.train.batch_size = 32
     cfg.train.eval_batch_size = 32
-    cfg.train.sampler = 'saint'
     cfg.train.num_epochs = 20
     cfg.train.lr = 5e-5
     cfg.train.weight_decay = 0.1
@@ -51,42 +88,6 @@ def set_config(cfg):
     cfg.train.grad_steps = 1
     cfg.train.early_stop = True
     cfg.train.early_stop_patience = 20
-
-
-    ## graph transformer specific config
-    cfg.gt = CN()
-    cfg.gt.class_token = False 
-    cfg.gt.global_pool = 'avg'
-    cfg.gt.task_type = 'regression'
-    cfg.gt.attn_type = 'performer'
-    # cfg.gt.gt_type = 'MLPMixer'
-    cfg.gt.gnn_type = 'GINEConv'
-    cfg.gt.fc_norm = None 
-    cfg.gt.norm_layer = None
-    cfg.gt.act_layer = None 
-    cfg.gt.nlayer_gt = 4
-    cfg.gt.nlayer_gnn = 4
-    cfg.gt.nlayer_mixer = 4
-    cfg.gt.bn = True
-    cfg.gt.res = True 
-    cfg.gt.metis = CN()
-    cfg.gt.metis.n_patches = 32
-    cfg.gt.metis.num_hops = 1
-    cfg.gt.metis.drop_rate = 0.0
-    cfg.gt.metis.online = True
-    cfg.gt.pos_enc = CN()
-    cfg.gt.pos_enc.lap_dim = 8
-    cfg.gt.pos_enc.rw_dim = 0
-    cfg.gt.pos_enc.patch_num_diff = -1
-    cfg.gt.pos_enc.patch_rw_dim = 8
-    cfg.gt.node_type = 'Discrete'
-    cfg.gt.edge_type = 'Discrete'
-    cfg.gt.nout = 1
-    cfg.gt.nfeat_node = 28
-    cfg.gt.nfeat_edge = 4
-    cfg.gt.channel = 64
-    cfg.gt.redraw = True
-
 
     return cfg
 
@@ -117,7 +118,32 @@ def update_cfg(cfg, args_str=None):
     # Update from command line
     cfg.merge_from_list(args.opts)
 
+
     return cfg
+
+
+def update_yacs_config(cfg, new_params: dict):
+    """
+    Update a YACS configuration object with new parameters from a dictionary.
+
+    Args:
+    cfg (CfgNode): The original YACS configuration object.
+    new_params (dict): A dictionary of parameters to update in the cfg.
+
+    Returns:
+    CfgNode: The updated configuration object.
+    """
+    # Convert the dictionary to a list of strings in YACS format
+    param_list = []
+    for key, value in new_params.items():
+        param_list.append(f'{key}')
+        param_list.append(f'{value}')
+
+    # Update the cfg using merge_from_list
+    cfg.merge_from_list(param_list)
+
+    return cfg
+
 
 
 cfg = set_config(CN())

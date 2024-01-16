@@ -1,4 +1,51 @@
+import torch
 from torch.optim.lr_scheduler import _LRScheduler
+from ogb.nodeproppred import Evaluator as NodePropPredEvaluator
+from ogb.graphproppred import Evaluator as GraphPropPredEvaluator
+from torchmetrics import AUROC, Accuracy, F1Score, MeanAbsoluteError
+import torch.optim.lr_scheduler as lr_scheduler
+
+def get_metric_from_cfg(cfg):
+    if 'ogbg' in cfg.dataset.name:
+        return GraphPropPredEvaluator(cfg.dataset.name)
+    elif 'ogbn' in cfg.dataset.name:
+        return NodePropPredEvaluator(cfg.dataset.name)
+    else:
+        if cfg.dataset.eval == 'multiclass-accuracy' or cfg.dataset.eval == 'accuracy':
+            metric = Accuracy(task = 'multiclass')
+        elif cfg.dataset.eval == 'binary-accuracy':
+            metric = Accuracy(task = 'binary')
+        elif cfg.dataset.eval == 'multiclass-auroc' or cfg.dataset.eval == 'auroc':
+            metric = AUROC(task='multiclass')
+        elif cfg.dataset.eval == 'binary-auroc':
+            metric = AUROC(task='binary')
+        elif cfg.dataset.eval == 'macrof1':
+            metric = F1Score(average='macro', task='multiclass')
+        elif cfg.dataset.eval == 'microf1':
+            metric = F1Score(average='micro', task='multiclass')
+        elif cfg.dataset.eval == 'mae':
+            metric = MeanAbsoluteError()
+        else:
+            raise NotImplementedError
+        return metric
+        
+
+def get_loss_fn_from_cfg(cfg):
+    if cfg.dataset.loss == 'cross-entropy':
+        return torch.nn.CrossEntropyLoss()
+
+
+def get_optim_from_cfg(model, cfg):
+    if cfg.dataset.optim == 'adam':
+        return torch.optim.Adam(model.parameters(), lr=cfg.train.lr, weight_decay=cfg.train.weight_decay)
+
+
+def get_scheduler_from_cfg(optimizer, cfg):
+    if cfg.dataset.scheduler == 'ExponentialLR':
+        return lr_scheduler.ExponentialLR(optimizer, gamma=cfg.train.lr_reduce_factor)
+    else:
+        return None
+
 
 class PolynomialDecayLR(_LRScheduler):
 

@@ -80,8 +80,9 @@ class TransformerModel(nn.Module):
 
         self.apply(lambda module: init_params(module, n_layers=n_layers))
 
-    def forward(self, batched_data):
+    def forward(self, data):
 
+        batched_data = data.x
 
         tensor = self.att_embeddings_nope(batched_data)
 

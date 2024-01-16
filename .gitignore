@@ -154,3 +154,10 @@ root/*
 
 logging/
 logging/*
+
+
+wandb/
+wandb/*
+
+./wandb/
+./wandb/*
