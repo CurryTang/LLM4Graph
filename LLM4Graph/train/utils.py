@@ -12,17 +12,17 @@ def get_metric_from_cfg(cfg):
         return NodePropPredEvaluator(cfg.dataset.name)
     else:
         if cfg.dataset.eval == 'multiclass-accuracy' or cfg.dataset.eval == 'accuracy':
-            metric = Accuracy(task = 'multiclass')
+            metric = Accuracy(task = 'multiclass', num_classes=cfg.model.num_classes)
         elif cfg.dataset.eval == 'binary-accuracy':
             metric = Accuracy(task = 'binary')
         elif cfg.dataset.eval == 'multiclass-auroc' or cfg.dataset.eval == 'auroc':
-            metric = AUROC(task='multiclass')
+            metric = AUROC(task='multiclass', num_classes=cfg.model.num_classes)
         elif cfg.dataset.eval == 'binary-auroc':
             metric = AUROC(task='binary')
         elif cfg.dataset.eval == 'macrof1':
-            metric = F1Score(average='macro', task='multiclass')
+            metric = F1Score(average='macro', task='multiclass', num_classes=cfg.model.num_classes)
         elif cfg.dataset.eval == 'microf1':
-            metric = F1Score(average='micro', task='multiclass')
+            metric = F1Score(average='micro', task='multiclass', num_classes=cfg.model.num_classes)
         elif cfg.dataset.eval == 'mae':
             metric = MeanAbsoluteError()
         else:
@@ -36,12 +36,12 @@ def get_loss_fn_from_cfg(cfg):
 
 
 def get_optim_from_cfg(model, cfg):
-    if cfg.dataset.optim == 'adam':
+    if cfg.train.optim == 'adam':
         return torch.optim.Adam(model.parameters(), lr=cfg.train.lr, weight_decay=cfg.train.weight_decay)
 
 
 def get_scheduler_from_cfg(optimizer, cfg):
-    if cfg.dataset.scheduler == 'ExponentialLR':
+    if cfg.train.scheduler == 'ExponentialLR':
         return lr_scheduler.ExponentialLR(optimizer, gamma=cfg.train.lr_reduce_factor)
     else:
         return None

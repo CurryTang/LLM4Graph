@@ -1,4 +1,4 @@
-wandb_enable: true
+wandb_enable: false
 wandb: 8755378737220049e53e8cc28a0d5ac2608abcdf
 dataset:
   planetoid_high: true

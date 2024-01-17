@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import scipy
 from google_drive_downloader import GoogleDriveDownloader as gdd
-from LLM4Graph.data.utils import generate_data_masks_torch
+from LLM4Graph.data.utils import generate_data_masks_torch, get_random_split_masks
 from LLM4Graph.data.transforms import get_transforms_by_config, get_pre_transforms_by_config
 
 
@@ -94,19 +94,17 @@ def get_data(cfg):
             data = train_transform(data)
         return data
     elif cfg.dataset.name.lower() == 'cora' or cfg.dataset.name.lower() == 'citeseer' or cfg.dataset.name.lower() == 'pubmed':
-        if not cfg.dataset.planetoid_high:
-            dataset = Planetoid(root=cfg.dataset.root, me=cfg.dataset.name.lower(), transform=train_transform, pre_transform=pre_train_transform)
-        else:
-            dataset = Planetoid(root=cfg.dataset.root, name=cfg.dataset.name.lower(), split='geom-gcn', transform=train_transform, pre_transform=pre_train_transform)
+        dataset = Planetoid(root=cfg.dataset.root, name=cfg.dataset.name.lower(), transform=train_transform, pre_transform=pre_train_transform)
         data = dataset[0]
         if not cfg.dataset.planetoid_high:
             data.train_masks = [data.train_mask]
             data.test_masks = [data.test_mask]
             data.val_masks = [data.val_mask]
         else:
-            data.train_masks = [data.train_mask[:, i] for i in range(data.train_mask.shape[1])]
-            data.test_masks = [data.test_mask[:, i] for i in range(data.test_mask.shape[1])]
-            data.val_masks = [data.val_mask[:, i] for i in range(data.val_mask.shape[1])]
+            train_masks, val_masks, test_masks = get_random_split_masks(data.x.shape[0], 0.6, 0.2, cfg.seeds)
+            data.train_masks = train_masks
+            data.test_masks = test_masks
+            data.val_masks = val_masks
         del data.train_mask, data.test_mask, data.val_mask
         return data
     elif 'ogbg' in cfg.dataset.name.lower():

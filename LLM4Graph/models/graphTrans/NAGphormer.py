@@ -81,8 +81,7 @@ class TransformerModel(nn.Module):
         self.apply(lambda module: init_params(module, n_layers=n_layers))
 
     def forward(self, data):
-
-        batched_data = data.x
+        batched_data = data
 
         tensor = self.att_embeddings_nope(batched_data)
 
@@ -112,8 +111,9 @@ class TransformerModel(nn.Module):
 
         output = self.Linear1(torch.relu(self.out_proj(output)))
 
+        pred = torch.argmax(output, dim=1)
     
-        return torch.log_softmax(output, dim=1)
+        return pred, output
 
 
 class FeedForwardNetwork(nn.Module):

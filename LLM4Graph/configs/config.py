@@ -4,7 +4,7 @@ from yacs.config import CfgNode as CN
 
 def set_config(cfg):
     ## Basic config
-    cfg.seeds = [0,1,2]
+    cfg.seeds = [0]
     cfg.wandb_enable = False
     cfg.wandb_project = "LLM4Graph"
     cfg.wandb = "you-will-never-know"
@@ -12,13 +12,14 @@ def set_config(cfg):
     cfg.num_workers = 8
     cfg.device = 'cuda'
     cfg.n_trials = 30
-    cfg.optuna_db = "sqlite:////mnt/home/chenzh85/graphlang/LLM4Graph/root/optuna.db"
+    cfg.optuna_db = "sqlite:////egr/research-dselab/chenzh85/LLM4Graph/LLM4Graph/root/optuna.db"
+    cfg.show_train_details = True
 
     ## dataset-related variables
     cfg.dataset = CN()
     cfg.dataset.name = 'cora'
     cfg.dataset.level = 'node'
-    cfg.dataset.root = "/mnt/home/chenzh85/graphlang/LLM4Graph/root"
+    cfg.dataset.root = "/egr/research-dselab/chenzh85/LLM4Graph/LLM4Graph/root"
     cfg.dataset.re_generate_random_mask = False
     ## only valid if re_generate_random_mask is True
     cfg.dataset.train_ratio = -1
@@ -31,16 +32,15 @@ def set_config(cfg):
     ## choices: saint, torch, pyg, sage
     cfg.dataset.loader = 'saint'
     ## whether we want to maximize the objective (classification) or minimize (regression)
-    cfg.dataset.objetive = 'maximize'
+    cfg.dataset.objective = 'maximize'
 
     ## path-related variables
-    cfg.logging = "/mnt/home/chenzh85/graphlang/LLM4Graph/logging"
+    cfg.logging = "/egr/research-dselab/chenzh85/LLM4Graph/LLM4Graph/logging"
 
 
     ## environment-related variables
     cfg.env = CN()
     cfg.env.llama_path = "/mnt/home/chenzh85/graphlang/Graph-LLM/llama2-7b"
-    cfg.env.metis_dll = "/mnt/home/chenzh85/anaconda3/envs/acl24/lib/libmetis.so"
 
     ## model-related configs
     cfg.model = CN()
@@ -73,12 +73,12 @@ def set_config(cfg):
     cfg.train.lr_reduce_factor = 0.5
     cfg.train.lr_schedule_patience = 20
     ## two ways to quit training: min_lr or early_stop
-    cfg.train.min_lr = 1e-5
+    cfg.train.min_lr = -1
     cfg.train.full_batch = False
     ## only valid if full_batch is False
     cfg.train.batch_size = 32
     cfg.train.eval_batch_size = 32
-    cfg.train.num_epochs = 20
+    cfg.train.num_epochs = 100
     cfg.train.lr = 5e-5
     cfg.train.weight_decay = 0.1
     cfg.train.dropout = 0.5 
