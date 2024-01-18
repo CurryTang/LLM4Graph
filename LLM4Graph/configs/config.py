@@ -11,15 +11,15 @@ def set_config(cfg):
     cfg.exp_name = "test"
     cfg.num_workers = 8
     cfg.device = 'cuda'
-    cfg.n_trials = 5
-    cfg.optuna_db = "sqlite:////egr/research-dselab/chenzh85/LLM4Graph/LLM4Graph/root/optuna.db"
+    cfg.n_trials = 30
+    cfg.optuna_db = "sqlite:////mnt/home/chenzh85/graphlang/LLM4Graph/root/optuna.db"
     cfg.show_train_details = True
 
     ## dataset-related variables
     cfg.dataset = CN()
     cfg.dataset.name = 'cora'
     cfg.dataset.level = 'node'
-    cfg.dataset.root = "/egr/research-dselab/chenzh85/LLM4Graph/LLM4Graph/root"
+    cfg.dataset.root = "/mnt/home/chenzh85/graphlang/LLM4Graph/root"
     cfg.dataset.re_generate_random_mask = False
     ## only valid if re_generate_random_mask is True
     cfg.dataset.train_ratio = -1
@@ -32,15 +32,16 @@ def set_config(cfg):
     ## choices: saint, torch, pyg, sage
     cfg.dataset.loader = 'saint'
     ## whether we want to maximize the objective (classification) or minimize (regression)
-    cfg.dataset.objective = 'maximize'
+    cfg.dataset.objetive = 'maximize'
 
     ## path-related variables
-    cfg.logging = "/egr/research-dselab/chenzh85/LLM4Graph/LLM4Graph/logging"
+    cfg.logging = "/mnt/home/chenzh85/graphlang/LLM4Graph/logging"
 
 
     ## environment-related variables
     cfg.env = CN()
     cfg.env.llama_path = "/mnt/home/chenzh85/graphlang/Graph-LLM/llama2-7b"
+    cfg.env.metis_dll = "/mnt/home/chenzh85/anaconda3/envs/acl24/lib/libmetis.so"
 
     ## model-related configs
     cfg.model = CN()
@@ -49,8 +50,6 @@ def set_config(cfg):
     cfg.model.nlayer_gt = 2
     cfg.model.nhead = 1
     cfg.model.hidden_dim = 64
-    ## FFN is used in NAGPhormer
-    cfg.model.ffn_dim = 64
     cfg.model.dropout = 0.5
     cfg.model.attention_dropout = 0.5
     cfg.model.act = 'relu'
