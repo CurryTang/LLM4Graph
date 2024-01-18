@@ -38,11 +38,18 @@ def get_loss_fn_from_cfg(cfg):
 def get_optim_from_cfg(model, cfg):
     if cfg.train.optim == 'adam':
         return torch.optim.Adam(model.parameters(), lr=cfg.train.lr, weight_decay=cfg.train.weight_decay)
-
+    elif cfg.train.optim == 'adamW':
+        return torch.optim.AdamW(model.parameters(), lr=cfg.train.lr, weight_decay=cfg.train.weight_decay)
 
 def get_scheduler_from_cfg(optimizer, cfg):
     if cfg.train.scheduler == 'ExponentialLR':
         return lr_scheduler.ExponentialLR(optimizer, gamma=cfg.train.lr_reduce_factor)
+    elif cfg.train.scheduler == 'PolynomialDecayLR':
+        return PolynomialDecayLR(
+            optimizer, cfg.train.warmup_updates, 
+            cfg.train.tot_updates, cfg.train.lr,
+            cfg.train.lr_schedule_min_lr, 1.0
+        )
     else:
         return None
 

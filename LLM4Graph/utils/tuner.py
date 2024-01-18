@@ -10,8 +10,11 @@ def max_trial_callback(study, trial, max_try):
         torch.cuda.empty_cache()
 
 def delete_failed_trials(study_name: str, storage_url: str):
-    study = optuna.load_study(study_name=study_name, storage=storage_url)
-    
+    try:
+        study = optuna.load_study(study_name=study_name, storage=storage_url)
+    except KeyError:
+        print(f"Study {study_name} not found, no need to delete failed trials.")
+        return
     failed_trial_ids = [trial._trial_id for trial in study.trials if trial.state == optuna.trial.TrialState.FAIL]
 
     if not failed_trial_ids:

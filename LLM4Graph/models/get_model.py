@@ -32,7 +32,7 @@ def get_model(cfg):
             cfg.model.nlayer_gt,
             cfg.model.nhead,
             cfg.model.hidden_dim,
-            cfg.model.hidden_dim,
+            cfg.model.ffn_dim,
             cfg.model.dropout,
             cfg.model.attention_dropout
         )

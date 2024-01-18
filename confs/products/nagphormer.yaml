@@ -4,19 +4,20 @@ dataset:
   planetoid_high: true
   loader: 'torch'
 train:
-  lr: 0.01
+  lr: 0.001
   batch_size: 1024
-  num_epochs: 2000
+  num_epochs: 100
   optim: 'adamW'
   scheduler: 'PolynomialDecayLR'
+  early_stop_patience: 5
 model:
   name: 'NAGPhormer'
-  feature_prop_hop: 3
-  nhead: 8
+  feature_prop_hop: 10
+  nhead: 1
   hidden_dim: 512
   dropout: 0.1
   attention_dropout: 0.1
   nlayer_gt: 1
   gt:
-    pe_dim: 3 
+    pe_dim: 3
   

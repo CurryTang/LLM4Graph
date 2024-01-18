@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import pandas as pd
 import datetime
-
+import pickle
 
 def seed_everything(seed: int):
     """
@@ -84,3 +84,54 @@ def get_first_k_words(s, k):
 
     # Take the first k words and join them back into a string
     return ' '.join(words[:k])
+
+
+def mkdir_p(path, enable_log=True):
+    """Create a directory for the specified path.
+    Parameters
+    ----------
+    path : str
+        Path name
+    enable_log : bool
+        Whether to print result for directory creation
+    """
+    import errno
+    if os.path.exists(path): return
+    try:
+        os.makedirs(path)
+        if enable_log:
+            print('Created directory {}'.format(path))
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path) and enable_log:
+            print('Directory {} already exists.'.format(path))
+        else:
+            raise
+
+
+def init_path(dir_or_file_list):
+    if isinstance(dir_or_file_list, list):
+        return [_init_path(_) for _ in dir_or_file_list]
+    else:  # single file
+        return _init_path(dir_or_file_list)
+
+
+def get_dir_of_file(f_name):
+    return os.path.dirname(f_name) + '/'
+
+
+def _init_path(dir_or_file):
+    if dir_or_file.startswith('~'):
+        dir_or_file = os.path.expanduser(dir_or_file)
+    path = get_dir_of_file(dir_or_file)
+    if not os.path.exists(path):
+        mkdir_p(path)
+    return dir_or_file.replace('//', '/')
+
+def pickle_save(var, f_name):
+    init_path(f_name)
+    pickle.dump(var, open(f_name, 'wb'))
+    print(f'Saved {f_name}')
+
+
+def pickle_load(f_name):
+    return pickle.load(open(f_name, 'rb'))

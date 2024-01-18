@@ -70,6 +70,7 @@ def get_plain_data_loader(data, cfg, train_mask, val_mask, test_mask):
 
 def get_loader_from_config(data, cfg, i):
     if cfg.dataset.loader == 'torch':
+        i = min(len(data.train_masks) - 1, i)
         train_loader, val_loader, test_loader = get_plain_data_loader(
             data, cfg, data.train_masks[i], data.val_masks[i], data.test_masks[i]
         )

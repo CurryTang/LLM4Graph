@@ -7,8 +7,8 @@ import torch_geometric
 import networkx as nx
 from torch_geometric.data import Data
 import re
-from LLM4Graph.data.lang import random_walk, RWSE, LapPE 
-from torch_geometric.transforms import Compose
+from LLM4Graph.data.lang import random_walk, RWSE, cal_lap_pe
+from torch_geometric.transforms import Compose, GCNNorm, NormalizeFeatures
 from LLM4Graph.utils.graph import get_propagated_features
 from LLM4Graph.data.lang.pe import LapPE
 
@@ -19,8 +19,8 @@ def get_transforms_by_config(cfg):
     train_transforms = []
     test_transforms = []
     if cfg.model.name.lower() == 'nagphormer':
-        train_transforms.append(NAGTransform(cfg.model.feature_prop_hop, cfg.model.gt.pe_dim))
-        test_transforms.append(NAGTransform(cfg.model.feature_prop_hop, cfg.model.gt.pe_dim))
+        train_transforms.append(NAGTransform(cfg.model.feature_prop_hop, cfg.model.gt.pe_dim, cfg))
+        test_transforms.append(NAGTransform(cfg.model.feature_prop_hop, cfg.model.gt.pe_dim, cfg))
     train_transform = Compose(train_transforms)
     test_transform = Compose(test_transforms)
     return train_transform, test_transform
@@ -193,19 +193,33 @@ class NAGTransform(object):
     """
         transform of NAGPhormer, which propogaes the features, and add LapPE
     """
-    def __init__(self, num_hops=1, lap_dim=0):
+    def __init__(self, num_hops=1, lap_dim=0, cfg = None):
         super().__init__()
         self.num_hops = num_hops
         self.lap_dim = lap_dim
+        self.cfg = cfg
     
-    def __call__(self, data): 
+    def __call__(self, data):
         if self.num_hops < 0:
             raise ValueError("num_hops should be greater than 0")
-        lap_features = LapPE(data.edge_index, self.lap_dim, data.x.size(0))
-        new_features = torch.cat([data.x, lap_features], dim=1)
+        feature_norm = NormalizeFeatures()
+        data = feature_norm(data)
+        # lap_features = LapPE(data.edge_index, self.lap_dim, data.x.size(0))
+        if self.lap_dim > 0:
+            lap_features = cal_lap_pe(
+            self.lap_dim, 
+            data, 
+            is_undirected=True, 
+            cfg = self.cfg
+        )
+            new_features = torch.cat([data.x, lap_features], dim=1)
+        else:
+            new_features = data.x
+        adj_norm = GCNNorm(add_self_loops=False)
+        data = adj_norm(data)
         data.x = new_features
         prop_features = get_propagated_features(
-            data.edge_index, data.x, k = self.num_hops, normalize=False
+            data.edge_index, data.x, edge_attr = data.edge_weight, k = self.num_hops, normalize=False
         )
         prop_features = torch.stack(prop_features, dim = 1)
         data.x = prop_features

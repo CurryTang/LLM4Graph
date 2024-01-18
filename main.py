@@ -26,18 +26,18 @@ def main(cfg):
     if hasattr(data, 'x'):
         cfg.model.num_features = data.x.shape[-1]
     cfg.model.num_classes = data.y.max().item() + 1
-    model = get_model(cfg)
-    optimizer = get_optim_from_cfg(model, cfg)
-    scheduler = get_scheduler_from_cfg(optimizer, cfg)
-    is_cuda_available = torch.cuda.is_available()
-    device = torch.device("cuda" if is_cuda_available else "cpu")
-    model = model.to(device)
     best_test_accs = []
     best_val_accs = []
-    for s in seeds:
+    is_cuda_available = torch.cuda.is_available()
+    device = torch.device("cuda" if is_cuda_available else "cpu")
+    for i, s in enumerate(seeds):
         seed_everything(s)
+        model = get_model(cfg)
+        optimizer = get_optim_from_cfg(model, cfg)
+        scheduler = get_scheduler_from_cfg(optimizer, cfg)
+        model = model.to(device)
         early_stop_accum = 0
-        train_loader, val_loader, test_loader =  get_loader_from_config(data, cfg, s)
+        train_loader, val_loader, test_loader =  get_loader_from_config(data, cfg, i)
         if cfg.dataset.objective == 'maximize':
             best_val_acc = 0
         else:
@@ -71,9 +71,9 @@ def main(cfg):
         wandb.log({'best_val_acc': best_val_acc, 'best_test_acc': best_test_acc})
         best_test_accs.append(best_test_acc)
         best_val_accs.append(best_val_acc)
-    avg_test_acc = np.mean(best_test_accs)
-    std_test_acc = np.std(best_test_accs)
-    print("Average Test Acc: {:.4f} +- {:.4f}".format(avg_test_acc, std_test_acc))
+    avg_test_acc = np.mean(best_test_accs) * 100
+    std_test_acc = np.std(best_test_accs) * 100
+    print("Average Test Acc: {:.2f} ± {:.2f}".format(avg_test_acc, std_test_acc))
     return np.mean(best_val_accs)
 
     

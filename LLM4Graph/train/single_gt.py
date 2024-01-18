@@ -9,6 +9,7 @@ def train(model, train_loader, val_loader, test_loader, optimizer, scheduler, cf
     """
         Train the model for one epoch
     """
+    model.train()
     loss_fn = get_loss_fn_from_cfg(cfg)
     metric = get_metric_from_cfg(cfg)
     for _, batch in enumerate(train_loader):
@@ -30,11 +31,11 @@ def train(model, train_loader, val_loader, test_loader, optimizer, scheduler, cf
             pred, logits = model(batch)
             loss = loss_fn(logits, batch.y)
             with torch.no_grad():
-                metric.update(pred, batch.y)
+                metric.update(pred.cpu(), batch.y.cpu())
         loss.backward()
         optimizer.step()
-    if scheduler is not None:
-        scheduler.step()
+        if scheduler is not None:
+            scheduler.step()
     
     train_metric = metric.compute()
     val_metric = single_gpu_test(model, val_loader, cfg, device)

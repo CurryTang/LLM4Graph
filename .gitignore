@@ -161,3 +161,7 @@ wandb/*
 
 ./wandb/
 ./wandb/*
+
+
+NAGphormer/
+NAGphormer/*

@@ -38,7 +38,7 @@ def get_feature_similarity(edge_index, features, k = 0):
         return _feature_similarity(aggr_features.cpu())
 
 @torch.no_grad()
-def get_propagated_features(edge_index, features, k = 0, normalize = True):
+def get_propagated_features(edge_index, features, edge_attr = None, k = 0, normalize = True):
     """
         Input: edge_index, features
         Output: a list of propagated features
@@ -48,7 +48,10 @@ def get_propagated_features(edge_index, features, k = 0, normalize = True):
     # import ipdb; ipdb.set_trace()
     num_nodes = features.shape[0]
     num_edges = edge_index.shape[1]
-    value = torch.ones(num_edges)
+    if edge_attr is None:
+        value = torch.ones(num_edges)
+    else:
+        value = edge_attr
     if normalize:
         edge_index, value = normalize_adj(edge_index, num_nodes)
     results = []

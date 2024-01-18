@@ -13,24 +13,25 @@ def sweep(cfg):
     delete_failed_trials(study_name, cfg.optuna_db)
     optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
     # study_name = get_current_time_as_filename()
-    study = optuna.create_study(study_name=study_name, direction=cfg.dataset.objetive, 
+    study = optuna.create_study(study_name=study_name, direction=cfg.dataset.objective, 
                                 storage=cfg.optuna_db, load_if_exists=True)
     param_f = params
+    old_cfg_seeds = cfg.seeds
+    cfg.seeds = [0]
     study.optimize(
         lambda trial: sweep_run(
             trial, cfg, param_f
         ), catch=(RuntimeError,), n_trials=cfg.n_trials, 
         callbacks=[lambda study, trial: max_trial_callback(study, trial, cfg.n_trials)], show_progress_bar=True, gc_after_trial=True
     )
-
     best_cfg = update_yacs_config(cfg, study.best_params)
-
+    cfg.seeds = old_cfg_seeds
     print("Best run:")
     main(best_cfg)
 
 
 def sweep_run(trial, cfg, params_f):
-    params = params_f(trial)
+    params = params_f(trial, cfg.model.name, cfg.dataset.name)
     cfg = update_yacs_config(cfg, params)
     best_val = main(cfg)
     return best_val 

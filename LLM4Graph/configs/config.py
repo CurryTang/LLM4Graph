@@ -11,7 +11,7 @@ def set_config(cfg):
     cfg.exp_name = "test"
     cfg.num_workers = 8
     cfg.device = 'cuda'
-    cfg.n_trials = 30
+    cfg.n_trials = 5
     cfg.optuna_db = "sqlite:////egr/research-dselab/chenzh85/LLM4Graph/LLM4Graph/root/optuna.db"
     cfg.show_train_details = True
 
@@ -49,6 +49,8 @@ def set_config(cfg):
     cfg.model.nlayer_gt = 2
     cfg.model.nhead = 1
     cfg.model.hidden_dim = 64
+    ## FFN is used in NAGPhormer
+    cfg.model.ffn_dim = 64
     cfg.model.dropout = 0.5
     cfg.model.attention_dropout = 0.5
     cfg.model.act = 'relu'
@@ -70,8 +72,14 @@ def set_config(cfg):
     cfg.train = CN()
     cfg.train.optim = 'adam'
     cfg.train.scheduler = None
+    ## these two are used by NAGPhormer
+    cfg.train.warmup_updates = 400
+    cfg.train.tot_updates = 1000
+    cfg.train.lr_schedule_min_lr = 1e-4
+
     cfg.train.lr_reduce_factor = 0.5
     cfg.train.lr_schedule_patience = 20
+
     ## two ways to quit training: min_lr or early_stop
     cfg.train.min_lr = -1
     cfg.train.full_batch = False
@@ -80,14 +88,14 @@ def set_config(cfg):
     cfg.train.eval_batch_size = 32
     cfg.train.num_epochs = 100
     cfg.train.lr = 5e-5
-    cfg.train.weight_decay = 0.1
+    cfg.train.weight_decay = 1e-5
     cfg.train.dropout = 0.5 
     cfg.train.grad_steps = 2
     cfg.train.max_norm = 0.1
     cfg.train.warmup_epochs = 0
     cfg.train.grad_steps = 1
     cfg.train.early_stop = True
-    cfg.train.early_stop_patience = 20
+    cfg.train.early_stop_patience = 50
 
     return cfg
 
