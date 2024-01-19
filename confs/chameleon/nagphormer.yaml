@@ -1,0 +1,23 @@
+wandb_enable: false
+wandb: 8755378737220049e53e8cc28a0d5ac2608abcdf
+dataset:
+  planetoid_high: true
+  loader: 'torch'
+  name: 'chameleon'
+train:
+  lr: 0.01
+  batch_size: 1024
+  num_epochs: 2000
+  optim: 'adamW'
+  scheduler: 'PolynomialDecayLR'
+model:
+  name: 'NAGPhormer'
+  feature_prop_hop: 3
+  nhead: 8
+  hidden_dim: 512
+  dropout: 0.1
+  attention_dropout: 0.1
+  nlayer_gt: 1
+  gt:
+    pe_dim: 3 
+  
