@@ -1,4 +1,4 @@
-## LLM4Graph: A library for applying LLMs for graph foundation model development
+## LLM4Graph: A library for next-generation graph foundation model development
 
 
 Ongoing project: a library for graph foundation model
